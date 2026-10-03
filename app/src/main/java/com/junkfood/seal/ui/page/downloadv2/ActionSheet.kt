@@ -149,17 +149,6 @@ private fun CancelButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
     )
 }
 
-@Composable
-private fun DownloadLogButton(modifier: Modifier = Modifier, onClick: () -> Unit) {
-    ActionSheetPrimaryButton(
-        modifier = modifier,
-        containerColor = LocalFixedColorRoles.current.secondaryFixed,
-        contentColor = LocalFixedColorRoles.current.onSecondaryFixedVariant,
-        imageVector = Icons.AutoMirrored.Outlined.TextSnippet,
-        text = stringResource(R.string.show_logs),
-        onClick = onClick,
-    )
-}
 
 @Composable
 private fun CopyURLButton(modifier: Modifier = Modifier, onClick: () -> Unit) {

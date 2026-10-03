@@ -114,12 +114,14 @@ class DownloadDialogViewModel(private val downloader: DownloaderV2) : ViewModel(
 
     private fun fetchPlaylist(action: Action.FetchPlaylist) {
         val (url, preferences) = action
+        val taskKey = "FetchPlaylist_$url"
 
         val job =
             viewModelScope.launch(Dispatchers.IO) {
                 DownloadUtil.getPlaylistOrVideoInfo(
                         playlistURL = url,
                         downloadPreferences = preferences,
+                        taskId = taskKey,
                     )
                     .onSuccess { info ->
                         withContext(Dispatchers.Main) {
@@ -143,7 +145,7 @@ class DownloadDialogViewModel(private val downloader: DownloaderV2) : ViewModel(
                         mSheetStateFlow.update { SheetState.Error(action = action, throwable = th) }
                     }
             }
-        mSheetStateFlow.update { SheetState.Loading(taskKey = "FetchPlaylist_$url", job = job) }
+        mSheetStateFlow.update { SheetState.Loading(taskKey = taskKey, job = job) }
     }
 
     private fun fetchFormat(action: Action.FetchFormats) {
@@ -221,9 +223,7 @@ class DownloadDialogViewModel(private val downloader: DownloaderV2) : ViewModel(
         return when (val state = sheetState) {
             is SheetState.Loading -> {
                 val res = YoutubeDL.destroyProcessById(id = state.taskKey)
-                if (res) {
-                    state.job.cancel()
-                }
+                state.job.cancel()
                 return res
             }
             else -> false

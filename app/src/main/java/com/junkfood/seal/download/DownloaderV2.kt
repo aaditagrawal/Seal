@@ -381,7 +381,7 @@ class DownloaderV2Impl(private val appContext: Context) : DownloaderV2, KoinComp
             is DownloadState.Restartable -> {
                 downloadState =
                     when (preState.action) {
-                        Download -> ReadyWithInfo
+                        Download -> if (type is TypeInfo.CustomCommand) Idle else ReadyWithInfo
                         FetchInfo -> Idle
                     }
             }

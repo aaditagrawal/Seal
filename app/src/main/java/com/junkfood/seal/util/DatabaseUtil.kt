@@ -94,7 +94,7 @@ object DatabaseUtil {
                 if (templates != null) {
                     val templateList = getTemplateList()
                     dao.importTemplates(
-                        templateList
+                        templates
                             .filterNot { templateList.contains(it) }
                             .map { it.copy(id = 0) }
                             .also { cnt += it.size }
