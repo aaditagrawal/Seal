@@ -139,14 +139,6 @@ fun OutlinedDismissButton(text: String = stringResource(R.string.dismiss), onCli
     OutlinedButton(onClick = onClick) { Text(text) }
 }
 
-@Composable
-fun FilledConfirmButton(
-    text: String = stringResource(R.string.confirm),
-    enabled: Boolean = true,
-    onClick: () -> Unit,
-) {
-    Button(onClick = onClick, enabled = enabled) { Text(text) }
-}
 
 @Composable
 fun LinkButton(

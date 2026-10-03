@@ -126,24 +126,6 @@ object NotificationUtil {
         notificationManager.notify(notificationId, builder.build())
     }
 
-    fun finishNotificationForCustomCommands(
-        notificationId: Int = DEFAULT_NOTIFICATION_ID,
-        title: String? = null,
-        text: String? = null,
-    ) {
-        //        notificationManager.cancel(notificationId)
-        val builder =
-            NotificationCompat.Builder(context, CHANNEL_ID)
-                .setSmallIcon(R.drawable.ic_stat_seal)
-                .setContentText(text)
-                .setProgress(0, 0, false)
-                .setAutoCancel(true)
-                .setOngoing(false)
-                .setStyle(null)
-        title?.let { builder.setContentTitle(title) }
-
-        notificationManager.notify(notificationId, builder.build())
-    }
 
     fun makeServiceNotification(intent: PendingIntent, text: String? = null): Notification {
         serviceNotification =

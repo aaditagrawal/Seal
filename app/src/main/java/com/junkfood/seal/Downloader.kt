@@ -313,32 +313,6 @@ object Downloader {
             }
     }
 
-    fun addToDownloadQueue(
-        videoInfo: VideoInfo? = null,
-        url: String = videoInfo?.originalUrl ?: "",
-        preferences: DownloadUtil.DownloadPreferences =
-            DownloadUtil.DownloadPreferences.createFromPreferences(),
-    ) {
-        require(url.isNotEmpty() || videoInfo != null)
-
-        if (!isDownloaderAvailable()) {
-            ToastUtil.makeToast(R.string.task_added)
-            applicationScope
-                .launch(Dispatchers.Default) {
-                    while (!isDownloaderAvailable()) {
-                        delay(3000)
-                    }
-                }
-                .invokeOnCompletion {
-                    videoInfo?.let {
-                        downloadVideoWithInfo(info = videoInfo, preferences = preferences)
-                    } ?: getInfoAndDownload(url, preferences)
-                }
-        } else {
-            videoInfo?.let { downloadVideoWithInfo(info = videoInfo, preferences = preferences) }
-                ?: getInfoAndDownload(url, preferences)
-        }
-    }
 
     fun downloadVideoWithInfo(
         info: VideoInfo,

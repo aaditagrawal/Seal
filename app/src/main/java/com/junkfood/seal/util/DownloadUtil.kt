@@ -87,6 +87,7 @@ object DownloadUtil {
     fun getPlaylistOrVideoInfo(
         playlistURL: String,
         downloadPreferences: DownloadPreferences = DownloadPreferences.createFromPreferences(),
+        taskId: String = playlistURL,
     ): Result<YoutubeDLInfo> =
         YoutubeDL.runCatching {
             ToastUtil.makeToastSuspend(context.getString(R.string.fetching_playlist_info))
@@ -117,7 +118,7 @@ object DownloadUtil {
                     }
                 }
             }
-            execute(request, playlistURL).out.run {
+            execute(request, taskId).out.run {
                 val playlistInfo = jsonFormat.decodeFromString<PlaylistResult>(this)
                 if (playlistInfo.type != "playlist") {
                     jsonFormat.decodeFromString<VideoInfo>(this)
