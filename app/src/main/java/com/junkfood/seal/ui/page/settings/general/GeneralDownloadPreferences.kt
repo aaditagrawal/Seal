@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.text.font.FontFamily
@@ -68,7 +69,6 @@ import androidx.compose.ui.unit.dp
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import com.google.accompanist.permissions.PermissionStatus
 import com.google.accompanist.permissions.rememberPermissionState
-import com.junkfood.seal.App
 import com.junkfood.seal.R
 import com.junkfood.seal.ui.common.booleanState
 import com.junkfood.seal.ui.component.BackButton
@@ -110,6 +110,7 @@ import kotlinx.coroutines.withContext
 @Composable
 fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: () -> Unit) {
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val hapticFeedback = LocalHapticFeedback.current
 
@@ -134,7 +135,7 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
     val notificationPermission =
         if (Build.VERSION.SDK_INT >= 33)
             rememberPermissionState(permission = Manifest.permission.POST_NOTIFICATIONS) { status ->
-                if (!status) ToastUtil.makeToast(context.getString(R.string.permission_denied))
+                if (!status) ToastUtil.makeToast(resources.getString(R.string.permission_denied))
                 else isNotificationPermissionGranted = true
             }
         else null
@@ -179,14 +180,11 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
                     }
                 item {
                     var ytdlpVersion by remember {
-                        mutableStateOf(
-                            YoutubeDL.getInstance().version(context.applicationContext)
-                                ?: context.getString(R.string.ytdlp_update)
-                        )
+                        mutableStateOf(YoutubeDL.getInstance().version(context.applicationContext))
                     }
                     PreferenceItem(
                         title = stringResource(id = R.string.ytdlp_update_action),
-                        description = ytdlpVersion,
+                        description = ytdlpVersion ?: stringResource(R.string.ytdlp_update),
                         leadingIcon = {
                             if (isUpdating) UpdateProgressIndicator()
                             else {
@@ -202,19 +200,19 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
                         onClick = {
                             scope.launch {
                                 runCatching {
-                                        isUpdating = true
-                                        UpdateUtil.updateYtDlp()
-                                        ytdlpVersion = YT_DLP_VERSION.getString()
-                                    }
+                                    isUpdating = true
+                                    UpdateUtil.updateYtDlp()
+                                    ytdlpVersion = YT_DLP_VERSION.getString()
+                                }
                                     .onFailure { th ->
                                         th.printStackTrace()
                                         ToastUtil.makeToastSuspend(
-                                            App.context.getString(R.string.yt_dlp_update_fail)
+                                            resources.getString(R.string.yt_dlp_update_fail)
                                         )
                                     }
                                     .onSuccess {
                                         ToastUtil.makeToastSuspend(
-                                            context.getString(R.string.yt_dlp_up_to_date) +
+                                            resources.getString(R.string.yt_dlp_up_to_date) +
                                                 " (${YT_DLP_VERSION.getString()})"
                                         )
                                     }
@@ -226,7 +224,8 @@ fun GeneralDownloadPreferences(onNavigateBack: () -> Unit, navigateToTemplate: (
                             IconButton(onClick = { showYtdlpDialog = true }) {
                                 Icon(
                                     imageVector = Icons.Outlined.Settings,
-                                    contentDescription = stringResource(id = R.string.open_settings),
+                                    contentDescription =
+                                        stringResource(id = R.string.open_settings),
                                 )
                             }
                         },

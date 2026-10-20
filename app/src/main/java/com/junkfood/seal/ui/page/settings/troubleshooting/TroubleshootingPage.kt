@@ -24,10 +24,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import com.junkfood.seal.App
 import com.junkfood.seal.R
 import com.junkfood.seal.ui.common.Route
 import com.junkfood.seal.ui.common.booleanState
@@ -56,6 +56,7 @@ fun TroubleShootingPage(
 ) {
     val uriHandler = LocalUriHandler.current
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
 
     BasePreferencePage(
@@ -95,14 +96,11 @@ fun TroubleShootingPage(
                 var showYtdlpDialog by remember { mutableStateOf(false) }
 
                 var ytdlpVersion by remember {
-                    mutableStateOf(
-                        YoutubeDL.getInstance().version(context.applicationContext)
-                            ?: context.getString(R.string.ytdlp_update)
-                    )
+                    mutableStateOf(YoutubeDL.getInstance().version(context.applicationContext))
                 }
                 PreferenceItem(
                     title = stringResource(id = R.string.ytdlp_update_action),
-                    description = ytdlpVersion,
+                    description = ytdlpVersion ?: stringResource(R.string.ytdlp_update),
                     leadingIcon = {
                         if (isUpdating) {
                             CircularProgressIndicator(
@@ -123,22 +121,22 @@ fun TroubleShootingPage(
                     onClick = {
                         scope.launch(Dispatchers.IO) {
                             runCatching {
-                                    isUpdating = true
-                                    UpdateUtil.updateYtDlp()
-                                    ytdlpVersion = YT_DLP_VERSION.getString()
-                                }
+                                isUpdating = true
+                                UpdateUtil.updateYtDlp()
+                                ytdlpVersion = YT_DLP_VERSION.getString()
+                            }
                                 .onFailure { th ->
                                     th.printStackTrace()
                                     withContext(Dispatchers.Main) {
                                         context.makeToast(
-                                            App.context.getString(R.string.yt_dlp_update_fail)
+                                            resources.getString(R.string.yt_dlp_update_fail)
                                         )
                                     }
                                 }
                                 .onSuccess {
                                     withContext(Dispatchers.Main) {
                                         context.makeToast(
-                                            context.getString(R.string.yt_dlp_up_to_date) +
+                                            resources.getString(R.string.yt_dlp_up_to_date) +
                                                 " (${YT_DLP_VERSION.getString()})"
                                         )
                                     }

@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import com.junkfood.seal.R
 import com.junkfood.seal.util.PreferenceUtil
 import com.junkfood.seal.util.ToastUtil
@@ -29,6 +30,7 @@ import kotlinx.coroutines.withContext
 fun AppUpdater() {
 
     val context = LocalContext.current
+    val resources = LocalResources.current
 
     var showUpdateDialog by rememberSaveable { mutableStateOf(false) }
     var currentDownloadStatus by remember {
@@ -66,11 +68,11 @@ fun AppUpdater() {
             return@LaunchedEffect
         withContext(Dispatchers.IO) {
             runCatching {
-                    UpdateUtil.checkForUpdate()?.let {
-                        release = it
-                        showUpdateDialog = true
-                    }
+                UpdateUtil.checkForUpdate()?.let {
+                    release = it
+                    showUpdateDialog = true
                 }
+            }
                 .onFailure { it.printStackTrace() }
         }
     }
@@ -86,21 +88,18 @@ fun AppUpdater() {
                 updateJob =
                     scope.launch(Dispatchers.IO) {
                         runCatching {
-                                UpdateUtil.downloadApk(release = release).collect { downloadStatus
-                                    ->
-                                    currentDownloadStatus = downloadStatus
-                                    if (downloadStatus is UpdateUtil.DownloadStatus.Finished) {
-                                        launcher.launch(
-                                            Manifest.permission.REQUEST_INSTALL_PACKAGES
-                                        )
-                                    }
+                            UpdateUtil.downloadApk(release = release).collect { downloadStatus ->
+                                currentDownloadStatus = downloadStatus
+                                if (downloadStatus is UpdateUtil.DownloadStatus.Finished) {
+                                    launcher.launch(Manifest.permission.REQUEST_INSTALL_PACKAGES)
                                 }
                             }
+                        }
                             .onFailure {
                                 it.printStackTrace()
                                 currentDownloadStatus = UpdateUtil.DownloadStatus.NotYet
                                 ToastUtil.makeToastSuspend(
-                                    context.getString(R.string.app_update_failed)
+                                    resources.getString(R.string.app_update_failed)
                                 )
                                 return@launch
                             }

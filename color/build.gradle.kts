@@ -1,25 +1,21 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
 }
 
-java {
-    sourceCompatibility = JavaVersion.VERSION_1_8
-    targetCompatibility = JavaVersion.VERSION_1_8
-}
 kotlin {
     jvmToolchain(21)
 }
 android {
-    compileSdk = 34
+    compileSdk { version = release(37) }
     defaultConfig {
-        minSdk = 21
+        minSdk = 24
     }
     namespace = "com.junkfood.seal.color"
+    buildFeatures { compose = true }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        sourceCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
     }
     buildTypes {
         release {

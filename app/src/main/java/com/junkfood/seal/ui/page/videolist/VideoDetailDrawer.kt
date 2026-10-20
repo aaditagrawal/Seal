@@ -35,6 +35,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.stringResource
@@ -143,6 +144,7 @@ fun VideoDetailDrawerImpl(
 ) {
     val clipboardManager = LocalClipboardManager.current
     val context = LocalContext.current
+    val resources = LocalResources.current
     SealModalBottomSheetM2(
         sheetState = sheetState,
         contentPadding = PaddingValues(horizontal = 20.dp),
@@ -169,7 +171,7 @@ fun VideoDetailDrawerImpl(
                 LongTapTextButton(
                     onClick = {
                         clipboardManager.setText(AnnotatedString(url))
-                        ToastUtil.makeToast(context.getString(R.string.link_copied))
+                        ToastUtil.makeToast(resources.getString(R.string.link_copied))
                     },
                     onClickLabel = stringResource(id = R.string.copy_link),
                     onLongClick = onOpenLink,

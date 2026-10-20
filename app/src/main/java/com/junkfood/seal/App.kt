@@ -14,6 +14,11 @@ import android.net.Uri
 import android.os.Build
 import android.os.IBinder
 import androidx.core.content.getSystemService
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
+import coil3.annotation.ExperimentalCoilApi
+import coil3.network.cachecontrol.CacheControlCacheStrategy
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import com.google.android.material.color.DynamicColors
 import com.junkfood.seal.download.DownloaderV2
 import com.junkfood.seal.download.DownloaderV2Impl
@@ -55,9 +60,19 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 
 class App : Application() {
+    @OptIn(ExperimentalCoilApi::class)
     override fun onCreate() {
         super.onCreate()
         MMKV.initialize(this)
+        SingletonImageLoader.setSafe { context ->
+            ImageLoader.Builder(context)
+                .components {
+                    add(
+                        OkHttpNetworkFetcherFactory(cacheStrategy = { CacheControlCacheStrategy() })
+                    )
+                }
+                .build()
+        }
 
         startKoin {
             androidLogger()
@@ -74,12 +89,11 @@ class App : Application() {
         }
 
         context = applicationContext
-        packageInfo =
-            packageManager.run {
-                if (Build.VERSION.SDK_INT >= 33)
-                    getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
-                else getPackageInfo(packageName, 0)
-            }
+        packageInfo = packageManager.run {
+            if (Build.VERSION.SDK_INT >= 33)
+                getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0))
+            else getPackageInfo(packageName, 0)
+        }
         applicationScope = CoroutineScope(SupervisorJob())
         DynamicColors.applyToActivitiesIfAvailable(this)
 

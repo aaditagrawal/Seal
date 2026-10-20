@@ -47,6 +47,7 @@ import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.platform.LocalLocale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.unit.dp
@@ -81,7 +82,6 @@ import com.kyant.monet.a1
 import com.kyant.monet.a2
 import com.kyant.monet.a3
 import io.material.hct.Hct
-import java.util.Locale
 import kotlinx.coroutines.Job
 
 private val ColorList =
@@ -216,7 +216,7 @@ fun AppearancePreferences(onNavigateBack: () -> Unit, onNavigateTo: (String) -> 
                 PreferenceItem(
                     title = stringResource(R.string.language),
                     icon = Icons.Outlined.Language,
-                    description = Locale.getDefault().toDisplayName(),
+                    description = LocalLocale.current.platformLocale.toDisplayName(),
                 ) {
                     onNavigateTo(Route.LANGUAGES)
                 }

@@ -6,7 +6,6 @@ import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
@@ -16,9 +15,9 @@ plugins {
 
 val keystorePropertiesFile: File = rootProject.file("keystore.properties")
 
-val splitApks = !project.hasProperty("noSplits")
+val splitApks = !providers.gradleProperty("noSplits").isPresent
 
-val abiFilterList = (properties["ABI_FILTERS"] as String).split(';')
+val abiFilterList = providers.gradleProperty("ABI_FILTERS").get().split(';')
 
 val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
 
@@ -26,7 +25,7 @@ val baseVersionName = currentVersion.name
 val currentVersionCode = currentVersion.code.toInt()
 
 android {
-    compileSdk = 35
+    compileSdk { version = release(37) }
 
     if (keystorePropertiesFile.exists()) {
         val keystoreProperties = Properties()
@@ -41,12 +40,21 @@ android {
         }
     }
 
-    buildFeatures { buildConfig = true }
+    buildFeatures {
+        buildConfig = true
+        resValues = true
+        compose = true
+    }
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_21
+        targetCompatibility = JavaVersion.VERSION_21
+        isCoreLibraryDesugaringEnabled = true
+    }
 
     defaultConfig {
         applicationId = "com.junkfood.seal"
         minSdk = 24
-        targetSdk = 35
+        targetSdk = 37
         versionCode = 200_000_150
         check(versionCode == currentVersionCode)
 
@@ -70,27 +78,6 @@ android {
 
     room { schemaDirectory("$projectDir/schemas") }
     ksp { arg("room.incremental", "true") }
-
-    androidComponents {
-        onVariants { variant ->
-            variant.outputs.forEach { output ->
-                val name =
-                    if (splitApks) {
-                        output.filters
-                            .find { it.filterType == FilterConfiguration.FilterType.ABI }
-                            ?.identifier
-                    } else {
-                        abiFilterList.firstOrNull()
-                    }
-
-                val baseAbiCode = abiCodes[name]
-
-                if (baseAbiCode != null) {
-                    output.versionCode.set(baseAbiCode + (output.versionCode.get() ?: 0))
-                }
-            }
-        }
-    }
 
     buildTypes {
         release {
@@ -136,15 +123,6 @@ android {
 
     lint { disable.addAll(listOf("MissingTranslation", "ExtraTranslation", "MissingQuantity")) }
 
-    applicationVariants.all {
-        outputs.all {
-            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                "Seal-${defaultConfig.versionName}-${name}.apk"
-        }
-    }
-
-    kotlinOptions { freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn" }
-
     packaging {
         resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
         jniLibs.useLegacyPackaging = true
@@ -156,12 +134,41 @@ android {
 
 ktfmt { kotlinLangStyle() }
 
-kotlin { jvmToolchain(21) }
+kotlin {
+    jvmToolchain(21)
+    compilerOptions { optIn.add("kotlin.RequiresOptIn") }
+}
+
+androidComponents {
+    onVariants { variant ->
+        variant.outputs.forEach { output ->
+            val abi =
+                if (splitApks) {
+                    output.filters
+                        .find { it.filterType == FilterConfiguration.FilterType.ABI }
+                        ?.identifier
+                } else {
+                    abiFilterList.firstOrNull()
+                }
+            abiCodes[abi]?.let { code -> output.versionCode.set(currentVersionCode + code) }
+            val outputName =
+                listOfNotNull(
+                        variant.flavorName?.takeIf { it.isNotEmpty() },
+                        if (splitApks) abi ?: "universal" else null,
+                        variant.buildType,
+                    )
+                    .joinToString("-")
+            output.outputFileName.set("Seal-$baseVersionName-$outputName.apk")
+        }
+    }
+}
 
 dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.5")
     implementation(project(":color"))
 
     implementation(libs.bundles.core)
+    implementation(libs.androidx.documentfile)
 
     implementation(libs.androidx.lifecycle.runtimeCompose)
 
@@ -170,6 +177,8 @@ dependencies {
     implementation(libs.bundles.accompanist)
 
     implementation(libs.coil.kt.compose)
+    implementation(libs.coil.network.okhttp)
+    implementation(libs.coil.network.cache.control)
 
     implementation(libs.kotlinx.serialization.json)
 

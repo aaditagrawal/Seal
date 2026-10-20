@@ -74,6 +74,7 @@ import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.pluralStringResource
@@ -106,10 +107,10 @@ import com.junkfood.seal.ui.component.SealModalBottomSheet
 import com.junkfood.seal.ui.component.SelectionGroupDefaults
 import com.junkfood.seal.ui.component.SelectionGroupItem
 import com.junkfood.seal.ui.component.SelectionGroupRow
-import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.Action
 import com.junkfood.seal.ui.page.downloadv2.configure.Config
 import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialog
 import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel
+import com.junkfood.seal.ui.page.downloadv2.configure.DownloadDialogViewModel.Action
 import com.junkfood.seal.ui.page.downloadv2.configure.FormatPage
 import com.junkfood.seal.ui.page.downloadv2.configure.PlaylistSelectionPage
 import com.junkfood.seal.ui.page.downloadv2.configure.PreferencesMock
@@ -202,6 +203,7 @@ fun DownloadPageV2(
 ) {
     val view = LocalView.current
     val context = LocalContext.current
+    val resources = LocalResources.current
     val scope = rememberCoroutineScope()
     val clipboardManager = LocalClipboardManager.current
     val uriHandler = LocalUriHandler.current
@@ -242,7 +244,7 @@ fun DownloadPageV2(
                 uriHandler.openUri(action.url)
             }
             is UiAction.ShareFile -> {
-                val shareTitle = context.getString(R.string.share)
+                val shareTitle = resources.getString(R.string.share)
                 FileUtil.createIntentForSharingFile(action.filePath)?.let {
                     context.startActivity(Intent.createChooser(it, shareTitle))
                 }
@@ -436,10 +438,9 @@ fun DownloadPageImplV2(
                 ) {
                     if (filteredMap.isNotEmpty()) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
-                            val videoCount =
-                                filteredMap.count {
-                                    !it.value.viewState.videoFormats.isNullOrEmpty()
-                                }
+                            val videoCount = filteredMap.count {
+                                !it.value.viewState.videoFormats.isNullOrEmpty()
+                            }
                             SubHeader(
                                 modifier = Modifier,
                                 videoCount = videoCount,
