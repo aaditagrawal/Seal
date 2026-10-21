@@ -24,9 +24,13 @@ jobs:
 
       - uses: gradle/actions/setup-gradle@v6.4.0
       - uses: astral-sh/setup-uv@v10.3.0
-      - name: Test release artifact staging without signing
+      - name: Test release staging and nested native checks
         run: uv run --no-project --python 3.14 python -m unittest discover -s scripts -p 'test_*.py'
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew :app:testGenericDebugUnitTest :app:lintGenericDebug :app:assembleGenericRelease --no-daemon --max-workers=2
+        run: ./gradlew :app:testGenericDebugUnitTest :app:lintGenericDebug :app:assembleGenericRelease :app:writeWebp16kReference --no-daemon --max-workers=2
+      - name: Test native overlay integrity guards
+        run: ./gradlew -p buildSrc test --no-daemon --max-workers=2
+      - name: Verify packaged native libraries
+        run: uv run --no-project --python 3.14 python scripts/verify_native_payloads.py --flavors generic

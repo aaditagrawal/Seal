@@ -200,3 +200,33 @@ dependencies {
     androidTestImplementation(libs.androidx.test.espresso.core)
     implementation(libs.androidx.compose.ui.tooling)
 }
+
+// The reference remains untransformed; exact artifact identity scopes the overlay.
+val sealWebp16k = Attribute.of("com.junkfood.seal.webp16k", Boolean::class.javaObjectType)
+val artifactType = Attribute.of("artifactType", String::class.java)
+configurations.configureEach { attributes.attribute(sealWebp16k, true) }
+val ffmpegReference = configurations.create("ffmpegReference") {
+    isCanBeConsumed = false
+    isTransitive = false
+    attributes.attribute(sealWebp16k, false)
+}
+dependencies.add(ffmpegReference.name, libs.youtubedl.android.ffmpeg)
+dependencies {
+    attributesSchema { attribute(sealWebp16k) }
+    artifactTypes.maybeCreate("aar").attributes.attribute(sealWebp16k, false)
+    registerTransform(SealWebp16kTransform::class) {
+        from.attribute(sealWebp16k, false).attribute(artifactType, "aar")
+        to.attribute(sealWebp16k, true).attribute(artifactType, "aar")
+        parameters {
+            upstreamArtifact.set(layout.file(providers.provider { ffmpegReference.singleFile }))
+            overlayDirectory.set(rootProject.layout.projectDirectory.dir("tools/webp16k/overlay"))
+            overlayManifest.set(rootProject.layout.projectDirectory.file("tools/webp16k/SHA256SUMS"))
+            overlayManifestSha256.set("0cadfac35a48a716f42fe8a0084222c55371091f92ea37dd09488f537f252a0b")
+            upstreamSha256.set("0a87ffa6cf912b0fe76c1a99b9107f543ee2f247935fae2c71f0822eb7bc5f49")
+        }
+    }
+}
+tasks.register<SealWebp16kTransform.WriteReference>("writeWebp16kReference") {
+    upstreamAar.from(ffmpegReference)
+    referenceFile.set(layout.buildDirectory.file("webp16k/upstream-aar.txt"))
+}

@@ -27,7 +27,13 @@ jobs:
 
     - run: uv run --no-project --python 3.14 python -m unittest discover -s scripts -p 'test_*.py'
 
-    - run: ./gradlew :app:assembleRelease --no-daemon --max-workers=2
+    - run: ./gradlew :app:assembleRelease :app:writeWebp16kReference --no-daemon --max-workers=2
+
+    - name: Test native overlay integrity guards
+      run: ./gradlew -p buildSrc test --no-daemon --max-workers=2
+
+    - name: Verify packaged native libraries before signing
+      run: uv run --no-project --python 3.14 python scripts/verify_native_payloads.py
 
     - name: Gather every flavor and ABI release
       run: uv run --no-project --python 3.14 python scripts/release_artifacts.py prepare

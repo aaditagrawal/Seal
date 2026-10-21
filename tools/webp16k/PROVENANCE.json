@@ -1,0 +1,37 @@
+{
+  "schema_version": 1,
+  "ffmpeg": {
+    "coordinate": "io.github.junkfood02.youtubedl-android:ffmpeg:0.18.1",
+    "sha256": "0a87ffa6cf912b0fe76c1a99b9107f543ee2f247935fae2c71f0822eb7bc5f49"
+  },
+  "libwebp": {
+    "version": "1.6.0",
+    "commit": "4fa21912338357f89e4fd51cf2368325b59e9bd9",
+    "url": "https://codeload.github.com/webmproject/libwebp/tar.gz/refs/tags/v1.6.0",
+    "sha256": "93a852c2b3efafee3723efd4636de855b46f9fe1efddd607e1f42f60fc8f2136",
+    "license": "BSD-3-Clause, COPYING/PATENTS/AUTHORS retained"
+  },
+  "build": {
+    "ndk": "28.2.13676358",
+    "cmake": "3.22.1",
+    "platform": "android-24",
+    "flags": [
+      "-g0",
+      "-Wl,-z,max-page-size=16384",
+      "-Wl,-z,common-page-size=16384"
+    ],
+    "built_abis": [
+      "arm64-v8a",
+      "x86_64",
+      "armeabi-v7a",
+      "x86"
+    ],
+    "distributed_abis": [
+      "arm64-v8a",
+      "x86_64"
+    ],
+    "workers": 2
+  },
+  "overlay_manifest_sha256": "0cadfac35a48a716f42fe8a0084222c55371091f92ea37dd09488f537f252a0b",
+  "preserved": "Original 32-bit archives, FFmpeg executables, other codecs, Python, aria2, dependency metadata and symlinks. Patched archive sizes differ to trigger upstream extraction updates."
+}
