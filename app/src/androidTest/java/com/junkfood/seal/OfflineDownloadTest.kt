@@ -12,6 +12,7 @@ import com.junkfood.seal.util.FileUtil.createEmptyFile
 import com.junkfood.seal.util.FileUtil.getFileName
 import com.junkfood.seal.util.FileUtil.getFileSize
 import com.tencent.mmkv.MMKV
+import com.yausername.ffmpeg.FFmpeg
 import com.yausername.youtubedl_android.YoutubeDL
 import com.yausername.youtubedl_android.YoutubeDLRequest
 import java.io.File
@@ -181,6 +182,21 @@ class OfflineDownloadTest {
                     .addOption("-o", "fixture.%(ext)s")
             assertEquals(0, YoutubeDL.execute(request).exitCode)
             assertArrayEquals(body, File(directory, "fixture.wav").readBytes())
+            FFmpeg.init(context)
+            val conversion =
+                YoutubeDLRequest("http://127.0.0.1:${server.localPort}/fixture.wav")
+                    .addOption("--ignore-config")
+                    .addOption("--no-playlist")
+                    .addOption("--socket-timeout", 5)
+                    .addOption("--retries", 0)
+                    .addOption("-P", directory.path)
+                    .addOption("-o", "converted.%(ext)s")
+                    .addOption("-x")
+                    .addOption("--audio-format", "mp3")
+            assertEquals(0, YoutubeDL.execute(conversion).exitCode)
+            val mp3 = File(directory, "converted.mp3").readBytes()
+            assertTrue(mp3.size > 128)
+            assertEquals("ID3", String(mp3.copyOfRange(0, 3), Charsets.US_ASCII))
             assertNull(serverFailure.get())
         } finally {
             server.close()

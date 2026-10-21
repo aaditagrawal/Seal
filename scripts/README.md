@@ -24,7 +24,7 @@ mock signature verification; local release validation also checks real unsigned
 APKs with the Android SDK verifier. No test signs or uploads an APK.
 
 `OfflineDownloadTest` is an Android instrumentation suite for media intents,
-temporary files, native MMKV persistence and a generated WAV download through
-bundled Python/yt-dlp over `127.0.0.1`. Run it on an isolated emulator with WiFi and
+temporary files, native MMKV persistence, a generated WAV download through bundled
+Python/yt-dlp over `127.0.0.1`, and actual FFmpeg MP3 conversion. Run it on an isolated emulator with WiFi and
 mobile data disabled. The download test refuses to run when Android reports an
 Internet-capable default network. It never uses a production URL.
