@@ -23,22 +23,38 @@ jobs:
 
     - uses: gradle/actions/setup-gradle@v6.4.0
 
-    - run: ./gradlew assembleRelease
+    - uses: astral-sh/setup-uv@v10.3.0
+
+    - run: uv run --no-project --python 3.14 python -m unittest discover -s scripts -p 'test_*.py'
+
+    - run: ./gradlew :app:assembleRelease --no-daemon --max-workers=2
+
+    - name: Gather every flavor and ABI release
+      run: uv run --no-project --python 3.14 python scripts/release_artifacts.py prepare
 
     - name: Sign app APK
       id: sign_app
-      uses: ilharp/sign-android-release@nightly
+      uses: ilharp/sign-android-release@758313793d0a2cf83cb215c5006100079d79c3f0 # nightly, reviewed recursive glob and -signed.apk output
       with:
-        releaseDir: app/build/outputs/apk/release
+        releaseDir: .release/unsigned
+        buildToolsVersion: '37.0.0'
         signingKey: ${{ secrets.SIGNING_KEY }}
         keyAlias: ${{ secrets.ALIAS }}
         keyStorePassword: ${{ secrets.KEY_STORE_PASSWORD }}
         keyPassword: ${{ secrets.KEY_PASSWORD }}
 
+    - name: Verify every signed APK before upload
+      env:
+        SIGNED_FILES: ${{ steps.sign_app.outputs.signedFiles }}
+      run: >-
+        uv run --no-project --python 3.14 python scripts/release_artifacts.py verify
+        --signed-files "$SIGNED_FILES"
+        --apksigner "$ANDROID_HOME/build-tools/37.0.0/apksigner"
+
     - name: Upload Artifact
       uses: actions/upload-artifact@v7.0.2
       with:
         name: signed-apks
-        path: app/build/outputs/apk/release/*-arm64-v8a-release-signed.apk
+        path: .release/verified/*-signed.apk
         if-no-files-found: error
         retention-days: 20

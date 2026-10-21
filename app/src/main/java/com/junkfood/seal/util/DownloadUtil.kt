@@ -433,7 +433,7 @@ object DownloadUtil {
     private fun YoutubeDLRequest.enableAria2c(): YoutubeDLRequest =
         this.addOption("--downloader", "libaria2c.so")
 
-    private fun YoutubeDLRequest.addOptionsForVideoDownloads(
+    internal fun YoutubeDLRequest.addOptionsForVideoDownloads(
         downloadPreferences: DownloadPreferences
     ): YoutubeDLRequest =
         this.apply {
@@ -556,7 +556,7 @@ object DownloadUtil {
             delimiter = ",",
         )
 
-    private fun YoutubeDLRequest.addOptionsForAudioDownloads(
+    internal fun YoutubeDLRequest.addOptionsForAudioDownloads(
         id: String,
         preferences: DownloadPreferences,
         playlistUrl: String,

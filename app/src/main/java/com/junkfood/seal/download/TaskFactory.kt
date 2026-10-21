@@ -24,6 +24,7 @@ object TaskFactory {
         newTitle: String,
         selectedSubtitles: List<String>,
         selectedAutoCaptions: List<String>,
+        basePreferences: DownloadPreferences = DownloadPreferences.createFromPreferences(),
     ): TaskWithState {
         val fileSize =
             formatList.fold(.0) { acc, format ->
@@ -45,7 +46,7 @@ object TaskFactory {
             (selectedSubtitles + selectedAutoCaptions).joinToString(separator = ",")
 
         val preferences =
-            DownloadPreferences.createFromPreferences()
+            basePreferences
                 .run {
                     copy(
                         formatIdString = formatId,

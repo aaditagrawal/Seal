@@ -17,3 +17,5 @@
 local.properties
 /keystore.properties
 .kotlin
+.release/
+__pycache__/
