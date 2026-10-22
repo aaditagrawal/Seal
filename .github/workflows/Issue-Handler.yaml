@@ -18,13 +18,14 @@ jobs:
       - name: Check out code
         uses: actions/checkout@v7.0.1
 
-      # Step 2: Set up Node.js environment (version 16)
+      # Step 2: Select the checked-in Node.js runtime
       - name: Set up Node.js
         uses: actions/setup-node@v7.1.0
         with:
-          node-version: 16
+          node-version-file: .node-version
 
       # Step 3: Custom script to check and close issues
+      # JavaScript actions use runner-managed Node independently of setup-node.
       - name: Check and close issues
         id: close-issues
         uses: actions/github-script@v9.0.0
