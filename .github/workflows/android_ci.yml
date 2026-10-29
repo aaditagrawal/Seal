@@ -29,3 +29,22 @@ jobs:
         run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew :app:testGenericDebugUnitTest :color:testDebugUnitTest :app:lintGenericRelease :app:assembleGenericRelease --no-daemon --max-workers=2
+
+      - name: Show complete lint findings
+        if: always()
+        run: |
+          for module in app color; do
+            if [ -d "$module/build" ]; then
+              find "$module/build" -type f -name 'lint-results-*.txt' -print -exec cat {} \;
+            fi
+          done
+
+      - name: Upload lint reports
+        if: always()
+        uses: actions/upload-artifact@b7c566a772e6b6bfb58ed0dc250532a479d7789f # v6
+        with:
+          name: android-lint-reports
+          if-no-files-found: ignore
+          path: |
+            app/build/**/lint-results-*.*
+            color/build/**/lint-results-*.*

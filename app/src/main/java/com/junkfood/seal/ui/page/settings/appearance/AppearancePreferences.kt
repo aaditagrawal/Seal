@@ -216,7 +216,7 @@ fun AppearancePreferences(onNavigateBack: () -> Unit, onNavigateTo: (String) -> 
                 PreferenceItem(
                     title = stringResource(R.string.language),
                     icon = Icons.Outlined.Language,
-                    description = Locale.getDefault().toDisplayName(),
+                    description = androidx.compose.ui.platform.LocalLocale.current.platformLocale.toDisplayName(),
                 ) {
                     onNavigateTo(Route.LANGUAGES)
                 }
