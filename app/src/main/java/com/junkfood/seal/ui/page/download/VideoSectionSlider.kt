@@ -26,7 +26,6 @@ import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -68,12 +67,20 @@ fun CustomRangeSlider(
     startInteractionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     endInteractionSource: MutableInteractionSource = remember { MutableInteractionSource() },
     thumbSize: DpSize = DpSize(4.dp, 24.dp),
+    onValueChangeFinished: () -> Unit = {},
 ) {
     RangeSlider(
         modifier = modifier,
         state = state,
-        startInteractionSource = startInteractionSource,
-        endInteractionSource = endInteractionSource,
+        onValueChange = { range ->
+            state.startValue = range.start
+            state.endValue = range.endInclusive
+        },
+        onValueChangeFinished = onValueChangeFinished,
+        enabled = enabled,
+        colors = colors,
+        startThumbInteractionSource = startInteractionSource,
+        endThumbInteractionSource = endInteractionSource,
         startThumb = {
             Box(modifier = Modifier) {
                 SliderDefaults.Thumb(
@@ -109,21 +116,23 @@ fun VideoSelectionSlider(
     state: RangeSliderState,
     onDurationClick: () -> Unit,
     onDiscard: () -> Unit,
+    onValueChangeFinished: () -> Unit = {},
 ) {
 
     val startText by
-        remember(state.activeRangeStart) {
-            mutableStateOf(state.activeRangeStart.roundToInt().toDurationText())
+        remember(state.startValue) {
+            mutableStateOf(state.startValue.roundToInt().toDurationText())
         }
     val endText by
-        remember(state.activeRangeEnd) {
-            mutableStateOf(state.activeRangeEnd.roundToInt().toDurationText())
+        remember(state.endValue) {
+            mutableStateOf(state.endValue.roundToInt().toDurationText())
         }
     Column(modifier = modifier) {
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             CustomRangeSlider(
                 modifier = Modifier.weight(1f).padding(horizontal = 12.dp),
                 state = state,
+                onValueChangeFinished = onValueChangeFinished,
             )
         }
 
@@ -335,23 +344,22 @@ fun VideoClipDialogPreview() {
 fun SliderPreview() {
     val time = 3700
     var valueRange by remember { mutableStateOf(0f..time.toFloat()) }
-    var shouldUpdate by remember { mutableStateOf(false) }
     val state = remember {
         RangeSliderState(
-            activeRangeStart = valueRange.start,
-            activeRangeEnd = valueRange.endInclusive,
-            valueRange = 0f..time.toFloat(),
-            onValueChangeFinished = { shouldUpdate = true },
+            startValue = valueRange.start,
+            endValue = valueRange.endInclusive,
+            trackRange = 0f..time.toFloat(),
         )
-    }
-    DisposableEffect(shouldUpdate) {
-        valueRange = state.activeRangeStart..state.activeRangeEnd
-        onDispose { shouldUpdate = false }
     }
     Surface() {
         Column {
             Text(text = "${valueRange.toIntRange()}")
-            VideoSelectionSlider(state = state, onDiscard = {}, onDurationClick = {})
+            VideoSelectionSlider(
+                state = state,
+                onDiscard = {},
+                onDurationClick = {},
+                onValueChangeFinished = { valueRange = state.startValue..state.endValue },
+            )
         }
     }
 }

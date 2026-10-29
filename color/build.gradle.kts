@@ -1,6 +1,5 @@
 plugins {
     alias(libs.plugins.android.library)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.compose.compiler)
 }
 
@@ -12,9 +11,11 @@ kotlin {
     jvmToolchain(21)
 }
 android {
-    compileSdk = 34
+    compileSdk {
+        version = release(37) { minorApiLevel = 1 }
+    }
     defaultConfig {
-        minSdk = 21
+        minSdk = 24
     }
     namespace = "com.junkfood.seal.color"
     compileOptions {
