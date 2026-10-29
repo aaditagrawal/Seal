@@ -1,12 +1,12 @@
 @file:Suppress("UnstableApiUsage")
 
 import com.android.build.api.variant.FilterConfiguration
+import com.android.build.api.variant.VariantOutputConfiguration
 import java.io.FileInputStream
 import java.util.Properties
 
 plugins {
     alias(libs.plugins.android.application)
-    alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.ksp)
     alias(libs.plugins.compose.compiler)
@@ -18,7 +18,7 @@ val keystorePropertiesFile: File = rootProject.file("keystore.properties")
 
 val splitApks = !project.hasProperty("noSplits")
 
-val abiFilterList = (properties["ABI_FILTERS"] as String).split(';')
+val abiFilterList = providers.gradleProperty("ABI_FILTERS").get().split(';')
 
 val abiCodes = mapOf("armeabi-v7a" to 1, "arm64-v8a" to 2, "x86" to 3, "x86_64" to 4)
 
@@ -26,7 +26,9 @@ val baseVersionName = currentVersion.name
 val currentVersionCode = currentVersion.code.toInt()
 
 android {
-    compileSdk = 35
+    compileSdk {
+        version = release(37) { minorApiLevel = 1 }
+    }
 
     if (keystorePropertiesFile.exists()) {
         val keystoreProperties = Properties()
@@ -41,7 +43,10 @@ android {
         }
     }
 
-    buildFeatures { buildConfig = true }
+    buildFeatures {
+        buildConfig = true
+        resValues = true
+    }
 
     defaultConfig {
         applicationId = "com.junkfood.seal"
@@ -82,6 +87,17 @@ android {
                     } else {
                         abiFilterList.firstOrNull()
                     }
+
+                val outputFilters =
+                    if (output.outputType == VariantOutputConfiguration.OutputType.UNIVERSAL) {
+                        listOf("universal")
+                    } else {
+                        output.filters.map { it.identifier }
+                    }
+                val outputName =
+                    (variant.productFlavors.map { it.second } + outputFilters +
+                        listOfNotNull(variant.buildType)).joinToString("-")
+                output.outputFileName.set("Seal-$baseVersionName-$outputName.apk")
 
                 val baseAbiCode = abiCodes[name]
 
@@ -136,15 +152,6 @@ android {
 
     lint { disable.addAll(listOf("MissingTranslation", "ExtraTranslation", "MissingQuantity")) }
 
-    applicationVariants.all {
-        outputs.all {
-            (this as com.android.build.gradle.internal.api.BaseVariantOutputImpl).outputFileName =
-                "Seal-${defaultConfig.versionName}-${name}.apk"
-        }
-    }
-
-    kotlinOptions { freeCompilerArgs = freeCompilerArgs + "-opt-in=kotlin.RequiresOptIn" }
-
     packaging {
         resources { excludes += "/META-INF/{AL2.0,LGPL2.1}" }
         jniLibs.useLegacyPackaging = true
@@ -159,11 +166,22 @@ ktfmt { kotlinLangStyle() }
 kotlin { jvmToolchain(21) }
 
 dependencies {
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.4"))
+    constraints {
+        implementation("commons-io:commons-io:2.22.0") {
+            because("Replace vulnerable archive runtime dependencies bundled by youtubedl-android")
+        }
+        implementation("org.apache.commons:commons-compress:1.28.0") {
+            because("Fix archive parsing vulnerabilities in the transitive compression library")
+        }
+    }
+
     implementation(project(":color"))
 
     implementation(libs.bundles.core)
 
     implementation(libs.androidx.lifecycle.runtimeCompose)
+    implementation(libs.androidx.documentfile)
 
     implementation(platform(libs.androidx.compose.bom))
     implementation(libs.bundles.androidxCompose)
@@ -190,4 +208,10 @@ dependencies {
     androidTestImplementation(libs.androidx.test.ext)
     androidTestImplementation(libs.androidx.test.espresso.core)
     implementation(libs.androidx.compose.ui.tooling)
+}
+
+kotlin {
+    compilerOptions {
+        freeCompilerArgs.add("-opt-in=kotlin.RequiresOptIn")
+    }
 }

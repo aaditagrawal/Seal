@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Slider
 import androidx.compose.material3.SliderDefaults
+import androidx.compose.material3.SliderState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
@@ -137,11 +138,15 @@ fun ConcurrentDownloadDialog(onDismissRequest: () -> Unit) {
 
                 Spacer(modifier = Modifier.height(8.dp))
 
+                val sliderState = remember {
+                    SliderState(value = concurrentFragments, steps = 2, trackRange = 0f..1f)
+                }
                 Slider(
-                    value = concurrentFragments,
-                    onValueChange = { concurrentFragments = it },
-                    steps = 2,
-                    valueRange = 0f..1f,
+                    state = sliderState,
+                    onValueChange = {
+                        sliderState.value = it
+                        concurrentFragments = it
+                    },
                     thumb = {
                         SliderDefaults.Thumb(
                             modifier = Modifier,

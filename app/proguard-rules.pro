@@ -66,3 +66,10 @@
 #-keepnames class <1>$$serializer { # -keepnames suffices; class is kept when serializer() is kept.
 #    static <1>$$serializer INSTANCE;
 #}
+# Commons Compress declares these codecs as optional. The updater uses ZIP/Deflate,
+# so retain the existing codec set without adding JNI or XZ implementations.
+# Keep the exceptions limited to the optional types reported by R8.
+-dontwarn com.github.luben.zstd.ZstdInputStream
+-dontwarn org.tukaani.xz.MemoryLimitException
+-dontwarn org.tukaani.xz.SingleXZInputStream
+-dontwarn org.tukaani.xz.XZInputStream

@@ -32,6 +32,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.junkfood.seal.App
@@ -68,6 +69,7 @@ fun UpdatePage(onNavigateBack: () -> Unit) {
     var updateChannel by UPDATE_CHANNEL.intState
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val resources = LocalResources.current
 
     var release by remember { mutableStateOf(UpdateUtil.Release()) }
     var showUpdateDialog by remember { mutableStateOf(false) }
@@ -148,7 +150,7 @@ fun UpdatePage(onNavigateBack: () -> Unit) {
                                                     showUpdateDialog = true
                                                 }
                                                     ?: ToastUtil.makeToastSuspend(
-                                                        context.getString(R.string.app_up_to_date)
+                                                        resources.getString(R.string.app_up_to_date)
                                                     )
                                             }
                                             isLoading = false
@@ -156,7 +158,7 @@ fun UpdatePage(onNavigateBack: () -> Unit) {
                                         .onFailure {
                                             it.printStackTrace()
                                             ToastUtil.makeToastSuspend(
-                                                context.getString(R.string.app_update_failed)
+                                                resources.getString(R.string.app_update_failed)
                                             )
                                             isLoading = false
                                         }

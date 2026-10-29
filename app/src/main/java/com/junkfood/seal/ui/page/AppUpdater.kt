@@ -16,6 +16,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalResources
 import com.junkfood.seal.R
 import com.junkfood.seal.util.PreferenceUtil
 import com.junkfood.seal.util.ToastUtil
@@ -29,6 +30,7 @@ import kotlinx.coroutines.withContext
 fun AppUpdater() {
 
     val context = LocalContext.current
+    val resources = LocalResources.current
 
     var showUpdateDialog by rememberSaveable { mutableStateOf(false) }
     var currentDownloadStatus by remember {
@@ -100,7 +102,7 @@ fun AppUpdater() {
                                 it.printStackTrace()
                                 currentDownloadStatus = UpdateUtil.DownloadStatus.NotYet
                                 ToastUtil.makeToastSuspend(
-                                    context.getString(R.string.app_update_failed)
+                                    resources.getString(R.string.app_update_failed)
                                 )
                                 return@launch
                             }

@@ -51,7 +51,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -470,30 +469,26 @@ private fun FormatPageImpl(
             }
 
             item(span = { GridItemSpan(maxLineSpan) }) {
-                var shouldUpdateClipDuration by remember { mutableStateOf(false) }
-
                 Column {
                     AnimatedVisibility(visible = isClippingVideo) {
                         Column {
                             val state =
                                 remember(isClippingVideo, showVideoClipDialog) {
                                     RangeSliderState(
-                                        activeRangeStart = videoClipDuration.start,
-                                        activeRangeEnd = videoClipDuration.endInclusive,
-                                        valueRange = videoDurationRange,
-                                        onValueChangeFinished = { shouldUpdateClipDuration = true },
+                                        startValue = videoClipDuration.start,
+                                        endValue = videoClipDuration.endInclusive,
+                                        trackRange = videoDurationRange,
                                     )
                                 }
-                            DisposableEffect(shouldUpdateClipDuration) {
-                                videoClipDuration = state.activeRangeStart..state.activeRangeEnd
-                                onDispose { shouldUpdateClipDuration = false }
-                            }
 
                             VideoSelectionSlider(
                                 modifier = Modifier.fillMaxWidth(),
                                 state = state,
                                 onDiscard = { isClippingVideo = false },
                                 onDurationClick = { showVideoClipDialog = true },
+                                onValueChangeFinished = {
+                                    videoClipDuration = state.startValue..state.endValue
+                                },
                             )
                             androidx.compose.material3.HorizontalDivider()
                         }
