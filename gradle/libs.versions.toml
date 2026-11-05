@@ -102,7 +102,6 @@ koin-compose = { group = "io.insert-koin", name = "koin-androidx-compose", versi
 
 
 room-runtime = { group = "androidx.room", name = "room-runtime", version.ref = "room" }
-room-ktx = { group = "androidx.room", name = "room-ktx", version.ref = "room" }
 room-compiler = { group = "androidx.room", name = "room-compiler", version.ref = "room" }
 
 #youtubedl-android-library = { group = "com.github.yausername.youtubedl_android", name = "library", version.ref = "youtubedlAndroid" }
