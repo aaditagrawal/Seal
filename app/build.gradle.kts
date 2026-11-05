@@ -186,7 +186,6 @@ dependencies {
     implementation(libs.koin.compose)
 
     implementation(libs.room.runtime)
-    implementation(libs.room.ktx)
     ksp(libs.room.compiler)
 
     implementation(libs.okhttp)
@@ -198,7 +197,7 @@ dependencies {
     testImplementation(libs.junit4)
     androidTestImplementation(libs.androidx.test.ext)
     androidTestImplementation(libs.androidx.test.espresso.core)
-    implementation(libs.androidx.compose.ui.tooling)
+    debugImplementation(libs.androidx.compose.ui.tooling)
 }
 
 // The reference remains untransformed; exact artifact identity scopes the overlay.
