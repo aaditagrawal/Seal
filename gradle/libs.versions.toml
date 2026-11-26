@@ -10,7 +10,7 @@ graphics = "1.1.0"
 documentfile = "1.1.0"
 constraintLayout = "1.1.2"
 
-androidxLifecycle = "2.11.0"
+androidxLifecycle = "2.11.1"
 androidxNavigation = "2.10.2"
 
 androidxEspresso = "3.7.0"

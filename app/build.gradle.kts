@@ -166,7 +166,7 @@ ktfmt { kotlinLangStyle() }
 kotlin { jvmToolchain(21) }
 
 dependencies {
-    implementation(platform("com.fasterxml.jackson:jackson-bom:2.22.4"))
+    implementation(platform("com.fasterxml.jackson:jackson-bom:2.23.0"))
     constraints {
         implementation("commons-io:commons-io:2.22.0") {
             because("Replace vulnerable archive runtime dependencies bundled by youtubedl-android")
